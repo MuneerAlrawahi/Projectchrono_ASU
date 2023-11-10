@@ -55,7 +55,7 @@ int main() {
     float plate_mass = 7.8e3 ;
     projectile->SetMass(plate_mass);
     projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
-    projectile->SetFamily(2);
+    projectile->SetFamily(1);
     DEMSim.SetFamilyFixed(2);
 
 
@@ -75,14 +75,27 @@ int main() {
 
 
 
+    // Change it to a plate 
+    // generate sieve clumps
+    auto input_xyz = DEMBoxGridSampler(make_float3(0, 0, 0), make_float3(5.0, 5.0, 0.001), sieve_sp_r * 2.0);
+    // The sieve is family 1
+    family_code.insert(family_code.end(), input_xyz.size(), 1);
+    DEMSim.SetFamilyPrescribedLinVel(1, "0", "0", "(t > 1.0) ? 2.0 * sin(5.0 * deme::PI * (t - 1.0)) : 0");
+    // No contact within family 1
+    DEMSim.DisableContactBetweenFamilies(1, 1);
 
 
 
 
 
+
+    DEMSim.DisableContactBetweenFamilies(1, 2);
+
+    DEMSim.SetCDUpdateFreq(30);
     DEMSim.SetInitTimeStep(step_size);
     DEMSim.SetGravitationalAcceleration(make_float3(0, 0, -9.81));
     DEMSim.SetCDUpdateFreq(40);
+
 
 
     // Start the sumiluation 
