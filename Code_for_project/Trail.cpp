@@ -1,11 +1,11 @@
-//  Copyright (c) 2021, SBEL GPU Development Team
-//  Copyright (c) 2021, University of Wisconsin - Madison
+
+//  Copyright (c) 2023, Arizona state university 
 //
-//	SPDX-License-Identifier: BSD-3-Clause
+
 
 // =============================================================================
-// This demo features a mesh-represented bladed mixer interacting with clump-represented
-// DEM particles.
+// This demo features A box of granular particles and vibration waves to study the 
+// the energy dissipation  
 // =============================================================================
 
 #include <core/ApiVersion.h>
@@ -47,7 +47,7 @@ int main() {
     DEMSim.InstructBoxDomainDimension({0, world_size}, {0, world_size}, {0, world_size});
     DEMSim.InstructBoxDomainBoundingBC("top_open", mat_type_granular);
 
-    // Define the plate and set up its postion 
+    // Define the plate on the bottom of the materials and set up its postion 
     auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
     std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
 
@@ -59,7 +59,7 @@ int main() {
     DEMSim.SetFamilyFixed(2);
 
 
-// Define the granular materrials 
+    // Define the granular materrials 
     float terrain_rad = 0.25;
     auto template_terrain = DEMSim.LoadSphereType(terrain_rad * terrain_rad * terrain_rad * 2.6e3 * 4 / 3 * 3.14,
                                                   terrain_rad, mat_type_granular);
@@ -74,20 +74,11 @@ int main() {
     std::cout << "Total num of particles: " << input_xyz.size() << std::endl;
 
 
-
-    // Change it to a plate 
-    // generate sieve clumps
-    auto input_xyz = DEMBoxGridSampler(make_float3(0, 0, 0), make_float3(5.0, 5.0, 0.001), sieve_sp_r * 2.0);
-    // The sieve is family 1
-    family_code.insert(family_code.end(), input_xyz.size(), 1);
-    DEMSim.SetFamilyPrescribedLinVel(1, "0", "0", "(t > 1.0) ? 2.0 * sin(5.0 * deme::PI * (t - 1.0)) : 0");
-    // No contact within family 1
-    DEMSim.DisableContactBetweenFamilies(1, 1);
-
-        auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
+    // Create the plate for waves on the top of the sample 
+    auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
     std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
 
-    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight + 0.06));
+    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight *2+.06));
     float plate_mass = 7.8e3 ;
     projectile->SetMass(plate_mass);
     projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
@@ -98,10 +89,7 @@ int main() {
 
 
 
-
-
-    DEMSim.DisableContactBetweenFamilies(2, 3);
-
+    DEMSim.DisableContactBetweenFamilies(1, 2);
     DEMSim.SetCDUpdateFreq(30);
     DEMSim.SetInitTimeStep(step_size);
     DEMSim.SetGravitationalAcceleration(make_float3(0, 0, -9.81));
@@ -125,7 +113,7 @@ int main() {
 
 
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-    for (float t = 0; t < sim_time; t += frame_time) {
+    for (float t = 0; t < sim_time;c t += frame_time) {
         std::cout << "Frame: " << currframe << std::endl;
         char filename[200], meshfilename[200];
         sprintf(filename, "%s/DEMdemo_output_%04d.csv", out_dir.c_str(), currframe);
