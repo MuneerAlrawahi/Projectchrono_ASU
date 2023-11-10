@@ -84,12 +84,23 @@ int main() {
     // No contact within family 1
     DEMSim.DisableContactBetweenFamilies(1, 1);
 
+        auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
+    std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
+
+    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight + 0.06));
+    float plate_mass = 7.8e3 ;
+    projectile->SetMass(plate_mass);
+    projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
+    projectile->SetFamily(2);
+    DEMSim.SetFamilyFixed(3);
+
+    DEMSim.SetFamilyPrescribedLinVel(2, "0", "0", "(t > 1.0) ? 2.0 * sin(5.0 * deme::PI * (t - 1.0)) : 0");
 
 
 
 
 
-    DEMSim.DisableContactBetweenFamilies(1, 2);
+    DEMSim.DisableContactBetweenFamilies(2, 3);
 
     DEMSim.SetCDUpdateFreq(30);
     DEMSim.SetInitTimeStep(step_size);
@@ -125,9 +136,6 @@ int main() {
 
         DEMSim.DoDynamicsThenSync(frame_time);
         DEMSim.ShowThreadCollaborationStats();
-
-
-
 
     }
     std::chrono::high_resolution_clock::time_point end = std::chrono::high_resolution_clock::now();
