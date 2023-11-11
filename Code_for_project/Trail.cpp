@@ -57,14 +57,14 @@ int main() {
     projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
     projectile->SetFamily(1);
     DEMSim.SetFamilyFixed(2);
-
-
-    // Define the granular materrials 
-    float terrain_rad = 0.25;
-    auto template_terrain = DEMSim.LoadSphereType(terrain_rad * terrain_rad * terrain_rad * 2.6e3 * 4 / 3 * 3.14,
-                                                  terrain_rad, mat_type_granular);
     // Track the projectile
     auto proj_tracker = DEMSim.Track(projectile);
+
+    // Define the granular materrials 
+    float terrain_rad = 0.5;
+                                                // (mass,raduis,materials)
+    auto template_terrain = DEMSim.LoadSphereType(terrain_rad * terrain_rad * terrain_rad * 2.6e3 * 4 / 3 * 3.14,
+                                                  terrain_rad, mat_type_granular);
     float sample_halfheight = world_size / 8;
     float3 sample_center = make_float3(world_size / 2, world_size / 2, sample_halfheight + 0.05);
     float sample_halfwidth = world_size / 2 * 0.95;
