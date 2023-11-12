@@ -78,7 +78,8 @@ int main() {
     auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
     std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
 
-    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight *2+.06));
+    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sam
+    ple_halfheight *2+.06));
     float plate_mass = 7.8e3 ;
     projectile->SetMass(plate_mass);
     projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
