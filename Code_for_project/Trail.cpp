@@ -75,16 +75,16 @@ int main() {
 
 
     // Create the plate for waves on the top of the sample 
-    auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
+    auto projectile_Top = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
     std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
 
-    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, sam
-    ple_halfheight *2+.06));
-    float plate_mass = 7.8e3 ;
-    projectile->SetMass(plate_mass);
-    projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
-    projectile->SetFamily(2);
+    projectile_Top->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight *2+.06));
+    float plate_mass_Top = 7.8e3 ;
+    projectile_Top->SetMass(plate_mass_Top);
+    projectile_Top->SetMOI(make_float3(plate_mass_Top * 2 / 5, plate_mass_Top * 2 / 5, plate_mass_Top * 2 / 5));
+    projectile_Top->SetFamily(2);
     DEMSim.SetFamilyFixed(3);
+    auto proj_tracker_top = DEMSim.Track(projectile_Top);
 
     DEMSim.SetFamilyPrescribedLinVel(2, "0", "0", "(t > 1.0) ? 2.0 * sin(5.0 * deme::PI * (t - 1.0)) : 0");
 
@@ -114,7 +114,7 @@ int main() {
 
 
     std::chrono::high_resolution_clock::time_point start = std::chrono::high_resolution_clock::now();
-    for (float t = 0; t < sim_time;c t += frame_time) {
+    for (float t = 0; t < sim_time; t += frame_time) {
         std::cout << "Frame: " << currframe << std::endl;
         char filename[200], meshfilename[200];
         sprintf(filename, "%s/DEMdemo_output_%04d.csv", out_dir.c_str(), currframe);
