@@ -64,11 +64,6 @@ int main() {
 
 
 
-
-
-
-
-
     // Define the plate on the bottom of the materials and set up its postion 
     auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
     std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;

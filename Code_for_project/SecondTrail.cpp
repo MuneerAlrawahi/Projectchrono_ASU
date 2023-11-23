@@ -47,7 +47,8 @@ int main() {
     DEMSim.InstructBoxDomainDimension({0, world_size}, {0, world_size}, {0, world_size});
     DEMSim.InstructBoxDomainBoundingBC("top_open", mat_type_granular);
 
-  // Define the terrain particle templates
+
+    // Define the terrain particle templates
     // Calculate its mass and MOI
     float terrain_density = 2.6e3;
     double clump_vol = 5.5886717;
@@ -55,7 +56,7 @@ int main() {
     float3 MOI = make_float3(2.928, 2.6029, 3.9908) * terrain_density;
     // Then load it to system
     std::shared_ptr<DEMClumpTemplate> my_template =
-        DEMSim.LoadClumpType(mass, MOI, GetDEMEDataFile("clumps/3_clump.csv"), mat_type_granular);
+        DEMSim.LoadClumpType(mass, MOI, GetDEMEDataFile("clumps/3_clump.csv"), mat_type_terrain);
     my_template->SetVolume(clump_vol);
     // Decide the scalings of the templates we just created (so that they are... like particles, not rocks)
     double scale = 0.0044;
@@ -63,15 +64,14 @@ int main() {
 
     // Sampler to sample
     HCPSampler sampler(scale * 3.);
-    float sample_halfheight = world_size / 8;
-    float3 sample_center = make_float3(world_size / 2, world_size / 2, sample_halfheight + 0.05);
+    float fill_height = 0.5;
+    double bottom = -0.5;
+    float3 fill_center = make_float3(0, 0, 0);
+    //const float fill_radius = soil_bin_diameter / 2. - scale * 3.;
     float sample_halfwidth = world_size / 2 * 0.95;
-    auto input_xyz = DEMBoxHCPSampler(sample_center, make_float3(sample_halfwidth, sample_halfwidth, sample_halfheight),
-                                      2.01 * mat_type_granular);
+    auto input_xyz = sampler.SampleBox(fill_center, sample_halfwidth);
     DEMSim.AddClumps(my_template, input_xyz);
     std::cout << "Total num of particles: " << input_xyz.size() << std::endl;
-
-
 
 
     DEMSim.DisableContactBetweenFamilies(1, 2);
