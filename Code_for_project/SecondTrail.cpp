@@ -47,53 +47,30 @@ int main() {
     DEMSim.InstructBoxDomainDimension({0, world_size}, {0, world_size}, {0, world_size});
     DEMSim.InstructBoxDomainBoundingBC("top_open", mat_type_granular);
 
+  // Define the terrain particle templates
+    // Calculate its mass and MOI
+    float terrain_density = 2.6e3;
+    double clump_vol = 5.5886717;
+    float mass = terrain_density * clump_vol;
+    float3 MOI = make_float3(2.928, 2.6029, 3.9908) * terrain_density;
+    // Then load it to system
+    std::shared_ptr<DEMClumpTemplate> my_template =
+        DEMSim.LoadClumpType(mass, MOI, GetDEMEDataFile("clumps/3_clump.csv"), mat_type_granular);
+    my_template->SetVolume(clump_vol);
+    // Decide the scalings of the templates we just created (so that they are... like particles, not rocks)
+    double scale = 0.0044;
+    my_template->Scale(scale);
 
-
-    // Define the granular materrials 
-    float terrain_rad = 0.5;
-                                                // (mass,raduis,materials)
-    auto template_terrain = DEMSim.LoadSphereType(terrain_rad * terrain_rad * terrain_rad * 2.6e3 * 4 / 3 * 3.14,
-                                                  terrain_rad, mat_type_granular);
+    // Sampler to sample
+    HCPSampler sampler(scale * 3.);
     float sample_halfheight = world_size / 8;
     float3 sample_center = make_float3(world_size / 2, world_size / 2, sample_halfheight + 0.05);
     float sample_halfwidth = world_size / 2 * 0.95;
     auto input_xyz = DEMBoxHCPSampler(sample_center, make_float3(sample_halfwidth, sample_halfwidth, sample_halfheight),
-                                      2.01 * terrain_rad);
-    DEMSim.AddClumps(template_terrain, input_xyz);
+                                      2.01 * mat_type_granular);
+    DEMSim.AddClumps(my_template, input_xyz);
     std::cout << "Total num of particles: " << input_xyz.size() << std::endl;
 
-
-
-
-
-
-
-
-    // Define the plate on the bottom of the materials and set up its postion 
-    auto projectile = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
-    std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
-
-    projectile->SetInitPos(make_float3(world_size / 2, world_size / 2, -0.5));
-    float plate_mass = 7.8e3 ;
-    projectile->SetMass(plate_mass);
-    projectile->SetMOI(make_float3(plate_mass * 2 / 5, plate_mass * 2 / 5, plate_mass * 2 / 5));
-    projectile->SetFamily(1);
-    DEMSim.SetFamilyFixed(2);
-    // Track the projectile
-    auto proj_tracker = DEMSim.Track(projectile);
-    // Create the plate for waves on the top of the sample 
-    auto projectile_Top = DEMSim.AddWavefrontMeshObject((GET_DATA_PATH() / "mesh/plate_1by1.obj").string(), mat_type_Plate);
-    std::cout << "Total num of triangles: " << projectile->GetNumTriangles() << std::endl;
-
-    projectile_Top->SetInitPos(make_float3(world_size / 2, world_size / 2, sample_halfheight *2+.06));
-    float plate_mass_Top = 7.8e3 ;
-    projectile_Top->SetMass(plate_mass_Top);
-    projectile_Top->SetMOI(make_float3(plate_mass_Top * 2 / 5, plate_mass_Top * 2 / 5, plate_mass_Top * 2 / 5));
-    projectile_Top->SetFamily(2);
-    DEMSim.SetFamilyFixed(3);
-    auto proj_tracker_top = DEMSim.Track(projectile_Top);
-
-    DEMSim.SetFamilyPrescribedLinVel(2, "0", "0", "(t > 1.0) ? 2.0 * sin(5.0 * deme::PI * (t - 1.0)) : 0");
 
 
 
